@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Products</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+  </head>
+  <body class="bg-gray-100 min-h-screen p-8">
+    <div class="max-w-6xl mx-auto">
+      <h1 class="text-3xl font-bold text-gray-900 mb-8 text-center">
+        Our Products
+      </h1>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <% if (allProducts && allProducts.length > 0) { %> <%
+        allProducts.forEach(function(item) { %> <% var imageSrc = '/mobile.jpg';
+        if (item.image) { imageSrc = item.image; } else if (item.name &&
+        item.name.toLowerCase().includes('bicycle')) { imageSrc =
+        '/bicycle.jpg'; } else if (item.name &&
+        item.name.toLowerCase().includes('mobile')) { imageSrc = '/mobile.jpg';
+        } %>
+        <div
+          class="bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition-all"
+        >
+          <div
+            class="relative h-48 bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center"
+          >
+            <img
+              src="<%= imageSrc %>"
+              alt="<%= item.name %>"
+              class="w-full h-full object-cover"
+            />
+            <span
+              class="absolute top-3 right-3 <%= item.isAvailable ? 'bg-green-500' : 'bg-red-500' %> text-white px-3 py-1 rounded-full text-sm font-medium"
+            >
+              <%= item.isAvailable ? 'Available' : 'Out of Stock' %>
+            </span>
+          </div>
+
+          <div class="p-5 space-y-4">
+            <div>
+              <h3 class="text-xl font-bold text-gray-900"><%= item.name %></h3>
+              <p class="text-gray-500 mt-1">
+                Warranty: <%= item.warranty %> years
+              </p>
+            </div>
+
+            <div class="flex justify-between items-center">
+              <p class="text-2xl font-bold text-gray-900">
+                ₹ <%= item.price %>
+              </p>
+              <div class="flex items-center gap-1">
+                <span class="text-yellow-400">★★★★★</span>
+              </div>
+            </div>
+
+            <button
+              class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-3 rounded-lg transition-colors cursor-pointer"
+            >
+              Add to Cart
+            </button>
+          </div>
+        </div>
+        <% }); %> <% } else { %>
+        <div class="text-center py-12">
+          <p class="text-gray-500 text-xl">No products available.</p>
+        </div>
+        <% } %>
+      </div>
+    </div>
+  </body>
+</html>
