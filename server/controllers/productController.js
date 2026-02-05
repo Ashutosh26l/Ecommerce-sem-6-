@@ -84,3 +84,19 @@ export const fixProductImages = async (req, res) => {
     res.json({ message: "Error fixing product images" });
   }
 };
+
+export const getProductDetail = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const product = await Product.findById(id);
+
+    if (!product) {
+      return res.status(404).render("product_detail", { product: null });
+    }
+
+    res.render("product_detail", { product });
+  } catch (error) {
+    console.error("Error:", error);
+    res.status(500).render("product_detail", { product: null });
+  }
+};

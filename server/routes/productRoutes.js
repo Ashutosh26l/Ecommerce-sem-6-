@@ -4,6 +4,7 @@ import {
   getAllProducts,
   updateProductImage,
   fixProductImages,
+  getProductDetail,
 } from "../controllers/productController.js";
 
 const router = express.Router();
@@ -11,6 +12,8 @@ const router = express.Router();
 router.post("/add", addProductController);
 
 router.get("/allProducts", getAllProducts);
+
+router.get("/:id", getProductDetail);
 
 router.put("/update-image/:id", updateProductImage);
 
