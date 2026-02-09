@@ -5,6 +5,16 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Products</title>
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <style>
+      .product-image {
+        transition: transform 450ms ease;
+        transform-origin: center;
+        will-change: transform;
+      }
+      .product-image-wrap:hover .product-image {
+        transform: scale(1.08);
+      }
+    </style>
   </head>
   <body class="bg-gray-100 min-h-screen p-8">
     <div class="max-w-6xl mx-auto">
@@ -25,12 +35,12 @@
           class="block bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition-all"
         >
           <div
-            class="relative h-48 bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center"
+            class="product-image-wrap relative h-48 bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center overflow-hidden"
           >
             <img
               src="<%= imageSrc %>"
               alt="<%= item.name %>"
-              class="w-full h-full object-cover"
+              class="product-image w-full h-full object-cover"
             />
             <span
               class="absolute top-3 right-3 <%= item.isAvailable ? 'bg-green-500' : 'bg-red-500' %> text-white px-3 py-1 rounded-full text-sm font-medium"
