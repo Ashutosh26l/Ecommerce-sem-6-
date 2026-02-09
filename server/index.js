@@ -8,8 +8,8 @@ import path from "path";
 dotenv.config();
 
 const app = express();
-//
-app.use(express.static(path.join(path.resolve(),"/public")));
+
+app.use(express.static(path.join(path.resolve(), "/public")));
 app.use(express.urlencoded({ extended: true }));
 app.set("view engine", "ejs");
 app.set("views", path.join(path.resolve(), "/views"));
@@ -30,16 +30,34 @@ mongoose
 
 app.use("/products", productRoutes);
 
-app.get("/", (req, res) => {
-  res.send("Ecommerce Server is running");
+app.get("/", async (req, res) => {
+  try {
+    const [totalProducts, inStockProducts, featuredProducts] = await Promise.all([
+      Product.countDocuments(),
+      Product.countDocuments({ isAvailable: true }),
+      Product.find().sort({ _id: -1 }).limit(4),
+    ]);
+
+    const outOfStockProducts = totalProducts - inStockProducts;
+    const averagePrice =
+      featuredProducts.length > 0
+        ? Math.round(
+            featuredProducts.reduce((sum, item) => sum + Number(item.price || 0), 0) /
+              featuredProducts.length
+          )
+        : 0;
+
+    return res.render("dashboard", {
+      stats: {
+        totalProducts,
+        inStockProducts,
+        outOfStockProducts,
+        averagePrice,
+      },
+      featuredProducts,
+    });
+  } catch (error) {
+    console.error("Error loading dashboard:", error);
+    return res.status(500).send("Unable to load dashboard");
+  }
 });
-
-// {
-//     "name":"mobile",
-//     "dateCreated":2025,
-//     "warranty":2,
-//     "price": 45000,
-//     "isAvailable": true
-// }
-
-//const products = Product.find();
