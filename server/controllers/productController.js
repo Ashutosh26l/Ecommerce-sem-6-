@@ -100,3 +100,50 @@ export const getProductDetail = async (req, res) => {
     res.status(500).render("product_detail", { product: null });
   }
 };
+
+export const getEditProduct = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const product = await Product.findById(id);
+
+    if (!product) {
+      return res.status(404).render("edit", { product: null });
+    }
+
+    res.render("edit", { product });
+  } catch (error) {
+    console.error("Error:", error);
+    res.status(500).render("edit", { product: null });
+  }
+};
+
+export const updateProduct = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { name, dateCreated, warranty, price, image } = req.body;
+    const isAvailable =
+      req.body.isAvailable === "true" || req.body.isAvailable === "on";
+
+    const updatedProduct = await Product.findByIdAndUpdate(
+      id,
+      {
+        name,
+        dateCreated,
+        warranty,
+        price,
+        isAvailable,
+        image,
+      },
+      { new: true }
+    );
+
+    if (!updatedProduct) {
+      return res.status(404).render("edit", { product: null });
+    }
+
+    return res.redirect(`/products/${updatedProduct._id}`);
+  } catch (error) {
+    console.error("Error:", error);
+    res.status(500).render("edit", { product: null });
+  }
+};
