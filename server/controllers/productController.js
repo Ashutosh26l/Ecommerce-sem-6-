@@ -22,8 +22,6 @@ export const addProductController = async (req, res) => {
 export const getAllProducts = async (req, res) => {
   try {
     const { availability } = req.query;
-
-    // If availability param is provided, filter by it; otherwise fetch all
     const query = availability ? { isAvailable: availability } : {};
 
     const allProducts = await Product.find(query);
@@ -64,10 +62,9 @@ export const updateProductImage = async (req, res) => {
   }
 };
 
-// Fix: Update all products with correct image paths
 export const fixProductImages = async (req, res) => {
   try {
-    const { image } = req.query; // Get image from query param
+    const { image } = req.query;
     const defaultImage = image || "/mobile.jpg";
 
     const result = await Product.updateMany(
@@ -98,6 +95,41 @@ export const getProductDetail = async (req, res) => {
   } catch (error) {
     console.error("Error:", error);
     res.status(500).render("product_detail", { product: null });
+  }
+};
+
+export const addProductReview = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { userName, rating, comment } = req.body;
+
+    const parsedRating = Number(rating);
+    if (!userName || !comment || Number.isNaN(parsedRating) || parsedRating < 1 || parsedRating > 5) {
+      return res.redirect(`/products/${id}`);
+    }
+
+    const updatedProduct = await Product.findByIdAndUpdate(
+      id,
+      {
+        $push: {
+          reviews: {
+            userName: String(userName).trim(),
+            rating: parsedRating,
+            comment: String(comment).trim(),
+          },
+        },
+      },
+      { new: true }
+    );
+
+    if (!updatedProduct) {
+      return res.status(404).render("product_detail", { product: null });
+    }
+
+    return res.redirect(`/products/${id}`);
+  } catch (error) {
+    console.error("Error:", error);
+    return res.redirect(`/products/${req.params.id}`);
   }
 };
 

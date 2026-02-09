@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title><%= typeof title !== 'undefined' ? title : 'Ecommerce' %></title>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <style>
+      .site-shell {
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+      }
+      .site-main {
+        flex: 1;
+      }
+    </style>
+  </head>
+  <body class="bg-slate-50 text-slate-900">
+    <div class="site-shell">
+      <header class="sticky top-0 z-40 border-b border-slate-200 bg-white/95 backdrop-blur">
+        <div class="max-w-6xl mx-auto px-4 sm:px-6">
+          <div class="h-16 flex items-center justify-between gap-4">
+            <a href="/products/allProducts" class="text-xl font-bold text-indigo-600">ShardaCart</a>
+            <form action="/products/allProducts" method="get" class="hidden md:flex flex-1 max-w-xl">
+              <input
+                type="text"
+                name="q"
+                placeholder="Search products"
+                class="w-full rounded-l-lg border border-slate-300 px-3 py-2 focus:outline-none focus:border-indigo-500"
+              />
+              <button class="rounded-r-lg bg-slate-900 text-white px-4 py-2">Search</button>
+            </form>
+            <nav class="flex items-center gap-3 sm:gap-5 text-sm font-medium">
+              <a href="/products/allProducts" class="text-slate-700 hover:text-indigo-600">Home</a>
+              <a href="/products/allProducts?availability=true" class="text-slate-700 hover:text-indigo-600">In Stock</a>
+              <a href="/products/allProducts?availability=false" class="text-slate-700 hover:text-indigo-600">Deals</a>
+              <a href="#" class="text-slate-700 hover:text-indigo-600">Cart</a>
+              <a href="#" class="text-slate-700 hover:text-indigo-600">Orders</a>
+              <a href="#" class="text-slate-700 hover:text-indigo-600">Account</a>
+            </nav>
+          </div>
+        </div>
+      </header>
+      <main class="site-main">
