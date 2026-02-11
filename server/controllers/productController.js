@@ -2,9 +2,18 @@ import Product from "../models/productModel.js";
 
 export const addProductController = async (req, res) => {
   try {
-    const { name, dateCreated, warranty, price, isAvailable, image } = req.body;
+    const {
+      name,
+      description,
+      dateCreated,
+      warranty,
+      price,
+      isAvailable,
+      image,
+    } = req.body;
     const newProduct = new Product({
       name,
+      description,
       dateCreated,
       warranty,
       price,
@@ -104,7 +113,13 @@ export const addProductReview = async (req, res) => {
     const { userName, rating, comment } = req.body;
 
     const parsedRating = Number(rating);
-    if (!userName || !comment || Number.isNaN(parsedRating) || parsedRating < 1 || parsedRating > 5) {
+    if (
+      !userName ||
+      !comment ||
+      Number.isNaN(parsedRating) ||
+      parsedRating < 1 ||
+      parsedRating > 5
+    ) {
       return res.redirect(`/products/${id}`);
     }
 
@@ -152,7 +167,7 @@ export const getEditProduct = async (req, res) => {
 export const updateProduct = async (req, res) => {
   try {
     const { id } = req.params;
-    const { name, dateCreated, warranty, price, image } = req.body;
+    const { name, description, dateCreated, warranty, price, image } = req.body;
     const isAvailable =
       req.body.isAvailable === "true" || req.body.isAvailable === "on";
 
@@ -160,6 +175,7 @@ export const updateProduct = async (req, res) => {
       id,
       {
         name,
+        description,
         dateCreated,
         warranty,
         price,

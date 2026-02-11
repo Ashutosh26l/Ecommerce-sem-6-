@@ -1,25 +1,42 @@
-<%- include("partials/header", { title: "Product Details" }) %>
-
-<% const p = product || {}; %>
-<% const imageSrc = p.image || '/mobile.jpg'; %>
+<%- include("partials/header", { title: "Product Details" }) %> <% const p =
+product || {}; %> <% const imageSrc = p.image || '/mobile.jpg'; %>
 
 <section class="max-w-6xl mx-auto px-6 py-10">
   <div class="mb-6">
-    <a href="/products/allProducts" class="text-slate-600 hover:text-slate-900 font-medium">Back to Products</a>
+    <a
+      href="/products/allProducts"
+      class="text-slate-600 hover:text-slate-900 font-medium"
+      >Back to Products</a
+    >
   </div>
 
   <div class="grid grid-cols-1 lg:grid-cols-2 gap-10">
     <div>
       <div class="bg-white rounded-2xl shadow-lg overflow-hidden">
-        <div class="relative h-96 bg-gradient-to-br from-indigo-500 to-purple-600">
-          <img src="<%= imageSrc %>" alt="<%= p.name || 'Product' %>" class="w-full h-full object-cover" />
-          <span class="absolute top-4 right-4 <%= p.isAvailable ? 'bg-green-500' : 'bg-red-500' %> text-white px-4 py-1 rounded-full text-sm font-medium"><%= p.isAvailable ? 'Available' : 'Out of Stock' %></span>
+        <div
+          class="relative h-96 bg-gradient-to-br from-indigo-500 to-purple-600"
+        >
+          <img
+            src="<%= imageSrc %>"
+            alt="<%= p.name || 'Product' %>"
+            class="w-full h-full object-cover"
+          />
+          <span
+            class="absolute top-4 right-4 <%= p.isAvailable ? 'bg-green-500' : 'bg-red-500' %> text-white px-4 py-1 rounded-full text-sm font-medium"
+            ><%= p.isAvailable ? 'Available' : 'Out of Stock' %></span
+          >
         </div>
         <div class="p-5 border-t">
-          <h1 class="text-3xl font-bold text-slate-900"><%= p.name || 'Product Name' %></h1>
+          <h1 class="text-3xl font-bold text-slate-900">
+            <%= p.name || 'Product Name' %>
+          </h1>
           <div class="flex items-center justify-between mt-3">
-            <p class="text-3xl font-bold text-slate-900">&#8377; <%= p.price || '0' %></p>
-            <span class="text-yellow-400 text-lg">&#9733;&#9733;&#9733;&#9733;&#9733;</span>
+            <p class="text-3xl font-bold text-slate-900">
+              &#8377; <%= p.price || '0' %>
+            </p>
+            <span class="text-yellow-400 text-lg"
+              >&#9733;&#9733;&#9733;&#9733;&#9733;</span
+            >
           </div>
           <p class="text-slate-500 mt-2">Inclusive of all taxes</p>
         </div>
@@ -30,16 +47,39 @@
       <div class="bg-white rounded-2xl shadow p-6">
         <h2 class="text-lg font-semibold text-slate-900">Highlights</h2>
         <div class="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <div class="bg-slate-50 rounded-lg p-4"><p class="text-sm text-slate-500">Warranty</p><p class="text-lg font-semibold text-slate-900"><%= p.warranty || 0 %> years</p></div>
-          <div class="bg-slate-50 rounded-lg p-4"><p class="text-sm text-slate-500">Availability</p><p class="text-lg font-semibold text-slate-900"><%= p.isAvailable ? 'In Stock' : 'Out of Stock' %></p></div>
-          <div class="bg-slate-50 rounded-lg p-4"><p class="text-sm text-slate-500">Product ID</p><p class="text-lg font-semibold text-slate-900"><%= p._id || 'N/A' %></p></div>
-          <div class="bg-slate-50 rounded-lg p-4"><p class="text-sm text-slate-500">Created On</p><p class="text-lg font-semibold text-slate-900"><%= p.dateCreated ? new Date(p.dateCreated).toLocaleDateString() : 'N/A' %></p></div>
+          <div class="bg-slate-50 rounded-lg p-4">
+            <p class="text-sm text-slate-500">Warranty</p>
+            <p class="text-lg font-semibold text-slate-900">
+              <%= p.warranty || 0 %> years
+            </p>
+          </div>
+          <div class="bg-slate-50 rounded-lg p-4">
+            <p class="text-sm text-slate-500">Availability</p>
+            <p class="text-lg font-semibold text-slate-900">
+              <%= p.isAvailable ? 'In Stock' : 'Out of Stock' %>
+            </p>
+          </div>
+          <div class="bg-slate-50 rounded-lg p-4">
+            <p class="text-sm text-slate-500">Product ID</p>
+            <p class="text-lg font-semibold text-slate-900">
+              <%= p._id || 'N/A' %>
+            </p>
+          </div>
+          <div class="bg-slate-50 rounded-lg p-4">
+            <p class="text-sm text-slate-500">Created On</p>
+            <p class="text-lg font-semibold text-slate-900">
+              <%= p.dateCreated ? new Date(p.dateCreated).toLocaleDateString() :
+              'N/A' %>
+            </p>
+          </div>
         </div>
       </div>
 
       <div class="bg-white rounded-2xl shadow p-6">
         <h2 class="text-lg font-semibold text-slate-900">Description</h2>
-        <p class="text-slate-600 mt-2">This product comes with a <%= p.warranty || 0 %>-year warranty and is priced at &#8377; <%= p.price || '0' %>. Availability status is <strong><%= p.isAvailable ? 'In Stock' : 'Out of Stock' %></strong>.</p>
+        <p class="text-slate-600 mt-2">
+          <%= p.description || 'No description available for this product.' %>
+        </p>
       </div>
 
       <div class="bg-white rounded-2xl shadow p-6">
@@ -53,9 +93,23 @@
 
       <div class="bg-white rounded-2xl shadow p-6">
         <h2 class="text-lg font-semibold text-slate-900">Customer Reviews</h2>
-        <form class="mt-4 grid grid-cols-1 gap-3" method="POST" action="/products/<%= p._id %>/reviews">
-          <input type="text" name="userName" placeholder="Your name" required class="w-full rounded-lg border border-slate-300 px-4 py-2 outline-none focus:border-indigo-500" />
-          <select name="rating" required class="w-full rounded-lg border border-slate-300 px-4 py-2 outline-none focus:border-indigo-500">
+        <form
+          class="mt-4 grid grid-cols-1 gap-3"
+          method="POST"
+          action="/products/<%= p._id %>/reviews"
+        >
+          <input
+            type="text"
+            name="userName"
+            placeholder="Your name"
+            required
+            class="w-full rounded-lg border border-slate-300 px-4 py-2 outline-none focus:border-indigo-500"
+          />
+          <select
+            name="rating"
+            required
+            class="w-full rounded-lg border border-slate-300 px-4 py-2 outline-none focus:border-indigo-500"
+          >
             <option value="">Select rating</option>
             <option value="5">5 - Excellent</option>
             <option value="4">4 - Very Good</option>
@@ -63,34 +117,64 @@
             <option value="2">2 - Fair</option>
             <option value="1">1 - Poor</option>
           </select>
-          <textarea name="comment" rows="3" placeholder="Write your review" required class="w-full rounded-lg border border-slate-300 px-4 py-2 outline-none focus:border-indigo-500"></textarea>
-          <button type="submit" class="bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-2.5 rounded-lg transition-colors">Submit Review</button>
+          <textarea
+            name="comment"
+            rows="3"
+            placeholder="Write your review"
+            required
+            class="w-full rounded-lg border border-slate-300 px-4 py-2 outline-none focus:border-indigo-500"
+          ></textarea>
+          <button
+            type="submit"
+            class="bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-2.5 rounded-lg transition-colors"
+          >
+            Submit Review
+          </button>
         </form>
 
         <div class="mt-6 space-y-3">
-          <% if (p.reviews && p.reviews.length > 0) { %>
-          <% p.reviews.slice().reverse().forEach(function(review) { %>
+          <% if (p.reviews && p.reviews.length > 0) { %> <%
+          p.reviews.slice().reverse().forEach(function(review) { %>
           <div class="border border-slate-200 rounded-lg p-4">
             <div class="flex items-center justify-between">
               <p class="font-semibold text-slate-900"><%= review.userName %></p>
-              <p class="text-sm text-amber-500"><%= '?'.repeat(review.rating) %><%= '?'.repeat(5 - review.rating) %></p>
+              <p class="text-sm text-amber-500">
+                <%= '★'.repeat(review.rating) %><%= '☆'.repeat(5 -
+                review.rating) %>
+              </p>
             </div>
             <p class="text-slate-600 mt-1"><%= review.comment %></p>
-            <p class="text-xs text-slate-400 mt-2"><%= review.createdAt ? new Date(review.createdAt).toLocaleString() : '' %></p>
+            <p class="text-xs text-slate-400 mt-2">
+              <%= review.createdAt ? new Date(review.createdAt).toLocaleString()
+              : '' %>
+            </p>
           </div>
-          <% }); %>
-          <% } else { %>
-          <p class="text-slate-500">No reviews yet. Be the first to review this product.</p>
+          <% }); %> <% } else { %>
+          <p class="text-slate-500">
+            No reviews yet. Be the first to review this product.
+          </p>
           <% } %>
         </div>
       </div>
 
       <div class="flex gap-3">
-        <button class="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-3 rounded-lg transition-colors">Add to Cart</button>
-        <button class="flex-1 bg-slate-900 hover:bg-slate-800 text-white font-medium py-3 rounded-lg transition-colors">Buy Now</button>
+        <button
+          class="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-3 rounded-lg transition-colors"
+        >
+          Add to Cart
+        </button>
+        <button
+          class="flex-1 bg-slate-900 hover:bg-slate-800 text-white font-medium py-3 rounded-lg transition-colors"
+        >
+          Buy Now
+        </button>
       </div>
 
-      <a href="/products/edit/<%= p._id %>" class="block w-full text-center border border-slate-300 hover:border-slate-500 text-slate-700 hover:text-slate-900 font-medium py-3 rounded-lg transition-colors">Edit Product</a>
+      <a
+        href="/products/edit/<%= p._id %>"
+        class="block w-full text-center border border-slate-300 hover:border-slate-500 text-slate-700 hover:text-slate-900 font-medium py-3 rounded-lg transition-colors"
+        >Edit Product</a
+      >
     </div>
   </div>
 </section>

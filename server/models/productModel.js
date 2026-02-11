@@ -12,6 +12,7 @@ const reviewSchema = new mongoose.Schema(
 
 const productSchema = new mongoose.Schema({
   name: { type: String, required: true },
+  description: { type: String, required: false, default: "" },
   dateCreated: { type: Number, required: true },
   warranty: { type: Number, required: true },
   price: { type: Number, required: true },
