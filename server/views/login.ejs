@@ -1,0 +1,31 @@
+<%- include("partials/header", { title: "Login" }) %>
+
+<section class="min-h-[70vh] flex items-center">
+  <div class="w-full max-w-md mx-auto bg-white border border-slate-200 rounded-2xl shadow-sm p-8">
+    <h1 class="text-2xl font-bold text-slate-900">Retailer Login</h1>
+    <p class="text-slate-500 mt-1">Sign in to access your inventory.</p>
+
+    <% if (error) { %>
+    <div class="mt-4 rounded-lg bg-rose-50 border border-rose-200 text-rose-700 px-4 py-2 text-sm"><%= error %></div>
+    <% } %>
+
+    <form action="/auth/login" method="post" class="mt-6 space-y-4">
+      <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
+      <div>
+        <label class="block text-sm font-medium text-slate-700">Email</label>
+        <input type="email" name="email" required value="<%= (form && form.email) || '' %>" class="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 outline-none focus:border-indigo-500" />
+      </div>
+      <div>
+        <label class="block text-sm font-medium text-slate-700">Password</label>
+        <input type="password" name="password" required class="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 outline-none focus:border-indigo-500" />
+      </div>
+      <button type="submit" class="w-full rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-2.5">Login</button>
+    </form>
+
+    <p class="text-sm text-slate-600 mt-4">
+      New retailer? <a href="/auth/register" class="text-indigo-600 hover:text-indigo-700 font-medium">Create account</a>
+    </p>
+  </div>
+</section>
+
+<%- include("partials/footer") %>

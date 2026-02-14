@@ -1,31 +1,25 @@
 import express from "express";
 import {
-  addProductController,
-  getAllProducts,
-  updateProductImage,
-  fixProductImages,
-  getProductDetail,
-  getEditProduct,
-  updateProduct,
   addProductReview,
+  createProductPage,
+  getAddProductPage,
+  getAllProductsPage,
+  getEditProductPage,
+  getProductDetailPage,
+  updateProductPage,
 } from "../controllers/productController.js";
+import { requireAuthPage } from "../middleware/auth.js";
 
 const router = express.Router();
 
-router.post("/add", addProductController);
+router.use(requireAuthPage);
 
-router.get("/allProducts", getAllProducts);
-
-router.get("/edit/:id", getEditProduct);
-
-router.post("/edit/:id", updateProduct);
-
+router.get("/new", getAddProductPage);
+router.post("/new", createProductPage);
+router.get("/allProducts", getAllProductsPage);
+router.get("/edit/:id", getEditProductPage);
+router.post("/edit/:id", updateProductPage);
 router.post("/:id/reviews", addProductReview);
-
-router.get("/:id", getProductDetail);
-
-router.put("/update-image/:id", updateProductImage);
-
-router.get("/fix-images", fixProductImages);
+router.get("/:id", getProductDetailPage);
 
 export default router;

@@ -1,109 +1,186 @@
 import Product from "../models/productModel.js";
 
-export const addProductController = async (req, res) => {
+const toNumber = (value, fallback = 0) => {
+  const parsed = Number(value);
+  return Number.isNaN(parsed) ? fallback : parsed;
+};
+
+const parseAvailability = (value) => {
+  if (typeof value === "undefined") return undefined;
+  if (typeof value === "boolean") return value;
+  return value === "true" || value === "on";
+};
+
+const normalizeCreatePayload = (body) => {
+  const quantity = Math.max(0, toNumber(body.quantity, 0));
+  return {
+    name: body.name,
+    description: body.description || "",
+    dateCreated: toNumber(body.dateCreated, Date.now()),
+    warranty: toNumber(body.warranty, 0),
+    price: toNumber(body.price, 0),
+    quantity,
+    image: body.image || "",
+    isAvailable: quantity > 0,
+  };
+};
+
+const normalizeUpdatePayload = (body) => {
+  const payload = {};
+
+  if (typeof body.name !== "undefined") payload.name = body.name;
+  if (typeof body.description !== "undefined") payload.description = body.description;
+  if (typeof body.dateCreated !== "undefined") payload.dateCreated = toNumber(body.dateCreated, Date.now());
+  if (typeof body.warranty !== "undefined") payload.warranty = toNumber(body.warranty, 0);
+  if (typeof body.price !== "undefined") payload.price = toNumber(body.price, 0);
+  if (typeof body.quantity !== "undefined") payload.quantity = Math.max(0, toNumber(body.quantity, 0));
+  if (typeof body.image !== "undefined") payload.image = body.image;
+
+  const isAvailable = parseAvailability(body.isAvailable);
+  if (typeof isAvailable !== "undefined" && typeof payload.quantity === "undefined") {
+    payload.isAvailable = isAvailable;
+    payload.quantity = isAvailable ? 1 : 0;
+  }
+
+  return payload;
+};
+
+const getOwnerFilter = (req) => ({ owner: req.user.id });
+
+export const getProducts = async (req, res) => {
   try {
-    const {
-      name,
-      description,
-      dateCreated,
-      warranty,
-      price,
-      isAvailable,
-      image,
-    } = req.body;
-    const newProduct = new Product({
-      name,
-      description,
-      dateCreated,
-      warranty,
-      price,
-      isAvailable,
-      image,
-    });
-    await newProduct.save();
-    res.send("New product has been added");
+    const products = await Product.find(getOwnerFilter(req)).sort({ createdAt: -1 });
+    return res.status(200).json(products);
   } catch (error) {
-    console.error(error);
-    res.send("Data Couldnot be added to the database");
+    return res.status(500).json({ message: "Failed to fetch products" });
   }
 };
 
-export const getAllProducts = async (req, res) => {
+export const createProduct = async (req, res) => {
   try {
-    const { availability } = req.query;
-    const query = availability ? { isAvailable: availability } : {};
-
-    const allProducts = await Product.find(query);
-
-    if (!allProducts || allProducts.length === 0) {
-      return res.json({ message: "No products available" });
+    const { name } = req.body;
+    if (!name) {
+      return res.status(400).json({ message: "name is required" });
     }
 
-    res.render("products", { allProducts });
-  } catch (error) {
-    console.error("Error:", error);
-    res.json({ message: "Error fetching the products" });
-  }
-};
-
-export const updateProductImage = async (req, res) => {
-  try {
-    const { id } = req.params;
-    const { image } = req.body;
-
-    const updatedProduct = await Product.findByIdAndUpdate(
-      id,
-      { image },
-      { new: true }
-    );
-
-    if (!updatedProduct) {
-      return res.json({ message: "Product not found" });
-    }
-
-    res.json({
-      message: "Image updated successfully",
-      product: updatedProduct,
+    const payload = normalizeCreatePayload(req.body);
+    const product = await Product.create({
+      ...payload,
+      owner: req.user.id,
     });
+
+    return res.status(201).json(product);
   } catch (error) {
-    console.error("Error:", error);
-    res.json({ message: "Error updating image" });
+    return res.status(500).json({ message: "Failed to create product" });
   }
 };
 
-export const fixProductImages = async (req, res) => {
-  try {
-    const { image } = req.query;
-    const defaultImage = image || "/mobile.jpg";
-
-    const result = await Product.updateMany(
-      {},
-      { $set: { image: defaultImage } }
-    );
-
-    res.json({
-      message: `Updated ${result.modifiedCount} products with image: ${defaultImage}`,
-      modifiedCount: result.modifiedCount,
-    });
-  } catch (error) {
-    console.error("Error:", error);
-    res.json({ message: "Error fixing product images" });
-  }
-};
-
-export const getProductDetail = async (req, res) => {
+export const updateProduct = async (req, res) => {
   try {
     const { id } = req.params;
     const product = await Product.findById(id);
 
     if (!product) {
+      return res.status(404).json({ message: "Product not found" });
+    }
+
+    if (product.owner.toString() !== req.user.id) {
+      return res.status(403).json({ message: "Forbidden: not your product" });
+    }
+
+    Object.assign(product, normalizeUpdatePayload(req.body));
+    await product.save();
+
+    return res.status(200).json(product);
+  } catch (error) {
+    return res.status(500).json({ message: "Failed to update product" });
+  }
+};
+
+export const deleteProduct = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const product = await Product.findById(id);
+
+    if (!product) {
+      return res.status(404).json({ message: "Product not found" });
+    }
+
+    if (product.owner.toString() !== req.user.id) {
+      return res.status(403).json({ message: "Forbidden: not your product" });
+    }
+
+    await product.deleteOne();
+    return res.status(200).json({ message: "Product deleted successfully" });
+  } catch (error) {
+    return res.status(500).json({ message: "Failed to delete product" });
+  }
+};
+
+export const getAllProductsPage = async (req, res) => {
+  try {
+    const { availability, q } = req.query;
+    const query = { ...getOwnerFilter(req) };
+
+    if (typeof availability !== "undefined") {
+      query.isAvailable = availability === "true";
+    }
+    if (q) {
+      query.name = { $regex: String(q), $options: "i" };
+    }
+
+    const allProducts = await Product.find(query).sort({ createdAt: -1 });
+    return res.render("products", { allProducts });
+  } catch (error) {
+    return res.status(500).send("Unable to load products");
+  }
+};
+
+export const getProductDetailPage = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const product = await Product.findOne({ _id: id, ...getOwnerFilter(req) });
+
+    if (!product) {
       return res.status(404).render("product_detail", { product: null });
     }
 
-    res.render("product_detail", { product });
+    return res.render("product_detail", { product });
   } catch (error) {
-    console.error("Error:", error);
-    res.status(500).render("product_detail", { product: null });
+    return res.status(500).render("product_detail", { product: null });
+  }
+};
+
+export const getEditProductPage = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const product = await Product.findOne({ _id: id, ...getOwnerFilter(req) });
+
+    if (!product) {
+      return res.status(404).render("edit", { product: null });
+    }
+
+    return res.render("edit", { product });
+  } catch (error) {
+    return res.status(500).render("edit", { product: null });
+  }
+};
+
+export const updateProductPage = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const product = await Product.findOne({ _id: id, ...getOwnerFilter(req) });
+
+    if (!product) {
+      return res.status(403).send("Forbidden");
+    }
+
+    Object.assign(product, normalizeUpdatePayload(req.body));
+    await product.save();
+
+    return res.redirect(`/products/${product._id}`);
+  } catch (error) {
+    return res.status(500).send("Unable to update product");
   }
 };
 
@@ -111,20 +188,14 @@ export const addProductReview = async (req, res) => {
   try {
     const { id } = req.params;
     const { userName, rating, comment } = req.body;
-
     const parsedRating = Number(rating);
-    if (
-      !userName ||
-      !comment ||
-      Number.isNaN(parsedRating) ||
-      parsedRating < 1 ||
-      parsedRating > 5
-    ) {
+
+    if (!userName || !comment || Number.isNaN(parsedRating) || parsedRating < 1 || parsedRating > 5) {
       return res.redirect(`/products/${id}`);
     }
 
-    const updatedProduct = await Product.findByIdAndUpdate(
-      id,
+    const updatedProduct = await Product.findOneAndUpdate(
+      { _id: id, ...getOwnerFilter(req) },
       {
         $push: {
           reviews: {
@@ -137,61 +208,32 @@ export const addProductReview = async (req, res) => {
       { new: true }
     );
 
-    if (!updatedProduct) {
-      return res.status(404).render("product_detail", { product: null });
-    }
-
+    if (!updatedProduct) return res.status(403).send("Forbidden");
     return res.redirect(`/products/${id}`);
   } catch (error) {
-    console.error("Error:", error);
     return res.redirect(`/products/${req.params.id}`);
   }
 };
 
-export const getEditProduct = async (req, res) => {
-  try {
-    const { id } = req.params;
-    const product = await Product.findById(id);
-
-    if (!product) {
-      return res.status(404).render("edit", { product: null });
-    }
-
-    res.render("edit", { product });
-  } catch (error) {
-    console.error("Error:", error);
-    res.status(500).render("edit", { product: null });
-  }
+export const getAddProductPage = (req, res) => {
+  return res.render("add_product");
 };
 
-export const updateProduct = async (req, res) => {
+export const createProductPage = async (req, res) => {
   try {
-    const { id } = req.params;
-    const { name, description, dateCreated, warranty, price, image } = req.body;
-    const isAvailable =
-      req.body.isAvailable === "true" || req.body.isAvailable === "on";
-
-    const updatedProduct = await Product.findByIdAndUpdate(
-      id,
-      {
-        name,
-        description,
-        dateCreated,
-        warranty,
-        price,
-        isAvailable,
-        image,
-      },
-      { new: true }
-    );
-
-    if (!updatedProduct) {
-      return res.status(404).render("edit", { product: null });
+    const { name } = req.body;
+    if (!name) {
+      return res.status(400).send("Product name is required");
     }
 
-    return res.redirect(`/products/${updatedProduct._id}`);
+    const payload = normalizeCreatePayload(req.body);
+    await Product.create({
+      ...payload,
+      owner: req.user.id,
+    });
+
+    return res.redirect("/products/allProducts");
   } catch (error) {
-    console.error("Error:", error);
-    res.status(500).render("edit", { product: null });
+    return res.status(500).send("Unable to add product");
   }
 };
