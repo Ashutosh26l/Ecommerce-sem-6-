@@ -1,0 +1,14 @@
+<%- include("partials/header", { title: "Error" }) %>
+
+<section class="min-h-[70vh] flex items-center px-6">
+  <div class="w-full max-w-2xl mx-auto bg-white border border-rose-200 rounded-2xl shadow-sm p-8">
+    <p class="text-sm font-semibold text-rose-600">Request Failed</p>
+    <h1 class="text-3xl font-bold text-slate-900 mt-1"><%= statusCode || 500 %></h1>
+    <p class="text-slate-600 mt-3"><%= message || "Something went wrong." %></p>
+    <div class="mt-6">
+      <a href="/" class="inline-block rounded-lg bg-slate-900 hover:bg-slate-800 text-white px-5 py-2.5">Back to Home</a>
+    </div>
+  </div>
+</section>
+
+<%- include("partials/footer") %>

@@ -16,9 +16,10 @@ dotenv.config();
 
 const app = express();
 const PORT = process.env.PORT || 5500;
+const normalizeOrigin = (origin) => String(origin || "").trim().replace(/\/$/, "");
 const allowedOrigins = (process.env.CORS_ORIGIN || `http://localhost:${PORT}`)
   .split(",")
-  .map((item) => item.trim())
+  .map((item) => normalizeOrigin(item))
   .filter(Boolean);
 
 const authRateLimiter = rateLimit({
@@ -38,7 +39,24 @@ app.use(cookieParser());
 app.use(
   cors({
     origin(origin, callback) {
-      if (!origin || allowedOrigins.includes(origin)) return callback(null, true);
+      const normalizedOrigin = normalizeOrigin(origin);
+      const isNullOrigin = normalizedOrigin.toLowerCase() === "null";
+      const isLocalhostDevOrigin =
+        process.env.NODE_ENV !== "production" &&
+        /^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/i.test(normalizedOrigin);
+      const allowNullOriginInDev = process.env.NODE_ENV !== "production" && isNullOrigin;
+
+      if (
+        !origin ||
+        allowedOrigins.includes(normalizedOrigin) ||
+        isLocalhostDevOrigin ||
+        allowNullOriginInDev
+      ) {
+        return callback(null, true);
+      }
+      console.error(
+        `CORS rejected origin: ${normalizedOrigin || "<empty>"}. Allowed origins: ${allowedOrigins.join(", ")}`
+      );
       return callback(new Error("Not allowed by CORS"));
     },
     credentials: true,
@@ -89,12 +107,24 @@ app.get("/", async (req, res) => {
     });
   } catch (error) {
     console.error("Error loading dashboard:", error);
-    return res.status(500).send("Unable to load dashboard");
+    return res.status(500).render("error", { statusCode: 500, message: "Unable to load dashboard" });
   }
 });
 
 app.get("/api/health", (req, res) => {
   return res.status(200).json({ message: "Inventory API is running" });
+});
+
+app.use((req, res) => {
+  return res.status(404).render("error", { statusCode: 404, message: "Page not found" });
+});
+
+app.use((err, req, res, next) => {
+  console.error("Unhandled error:", err);
+  return res.status(err?.statusCode || 500).render("error", {
+    statusCode: err?.statusCode || 500,
+    message: err?.message || "Something went wrong",
+  });
 });
 
 connectDb().then(() => {

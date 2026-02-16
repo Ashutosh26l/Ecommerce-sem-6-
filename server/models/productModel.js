@@ -34,6 +34,11 @@ productSchema.pre("validate", function setStockStatus() {
   this.isAvailable = qty > 0;
 });
 
+productSchema.post("findOneAndDelete", async function cleanupReviews(doc) {
+  if (!doc) return;
+  doc.reviews = [];
+});
+
 const Product = mongoose.model("Product", productSchema);
 
 export default Product;
