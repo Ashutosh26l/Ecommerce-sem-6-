@@ -8,6 +8,10 @@
         if (!form.checkValidity()) {
           event.preventDefault();
           event.stopPropagation();
+          const firstInvalid = form.querySelector(":invalid");
+          if (firstInvalid && typeof firstInvalid.focus === "function") {
+            firstInvalid.focus();
+          }
         }
         form.classList.add("was-validated");
       },

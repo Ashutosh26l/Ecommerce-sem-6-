@@ -268,6 +268,7 @@ export const addToCart = async (req, res) => {
     const { id } = req.params;
     const product = await Product.findById(id);
     if (!product || !hasStock(product)) {
+      req.flash("error", "This product is currently out of stock");
       return res.status(400).redirect(`/products/${id}`);
     }
 
@@ -347,7 +348,13 @@ export const getBuyNowPage = async (req, res) => {
     const { id } = req.params;
     const product = await Product.findById(id);
 
-    if (!product || !hasStock(product)) {
+    if (!product) {
+      req.flash("error", "Product not found");
+      return res.status(404).redirect("/products/allProducts");
+    }
+
+    if (!hasStock(product)) {
+      req.flash("error", "This product is out of stock");
       return res.status(400).redirect(`/products/${id}`);
     }
 
@@ -366,7 +373,13 @@ export const buyNow = async (req, res) => {
 
     const availableQuantity = getAvailableQuantityForPurchase(product);
     if (!product || availableQuantity < quantity || availableQuantity <= 0) {
-      return res.status(400).redirect(`/products/${id}`);
+      return res.status(400).render("buy_now", {
+        product,
+        formData: req.body,
+        error: !product
+          ? "Product not found"
+          : `Only ${Math.max(availableQuantity, 0)} item(s) available in stock`,
+      });
     }
 
     if (!fullName || !email || !phone || !addressLine1 || !city || !state || !pincode || !paymentMethod) {

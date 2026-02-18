@@ -7,7 +7,7 @@
 <section class="max-w-6xl mx-auto px-4 sm:px-6 py-10">
   <h1 class="text-3xl font-bold text-slate-900 mb-6">Checkout</h1>
   <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-    <form action="/products/<%= p._id %>/buy-now" method="POST" class="lg:col-span-2 bg-white rounded-2xl border border-slate-200 shadow-sm p-6 space-y-6 needs-validation" novalidate>
+    <form action="/products/<%= p._id %>/buy-now" method="POST" class="lg:col-span-2 bg-white rounded-2xl border border-slate-200 shadow-sm p-6 space-y-6 needs-validation">
       <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
 
       <% if (typeof error !== "undefined" && error) { %>
@@ -19,7 +19,7 @@
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <input type="text" name="fullName" required value="<%= f.fullName || '' %>" placeholder="Full Name" class="rounded-lg border border-slate-300 px-4 py-2.5 focus:border-indigo-500 outline-none" />
           <input type="email" name="email" required value="<%= f.email || (currentUser ? currentUser.email : '') %>" placeholder="Email" class="rounded-lg border border-slate-300 px-4 py-2.5 focus:border-indigo-500 outline-none" />
-          <input type="tel" name="phone" required value="<%= f.phone || '' %>" placeholder="Mobile Number" class="rounded-lg border border-slate-300 px-4 py-2.5 focus:border-indigo-500 outline-none sm:col-span-2" />
+          <input type="tel" name="phone" required pattern="[0-9]{10}" title="Enter a valid 10-digit mobile number" value="<%= f.phone || '' %>" placeholder="Mobile Number" class="rounded-lg border border-slate-300 px-4 py-2.5 focus:border-indigo-500 outline-none sm:col-span-2" />
         </div>
       </div>
 
