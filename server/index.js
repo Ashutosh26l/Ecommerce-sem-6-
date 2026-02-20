@@ -37,10 +37,10 @@ app.use(express.urlencoded({ extended: true }));
 app.set("view engine", "ejs");
 app.set("views", path.join(path.resolve(), "/views"));
 app.use(express.json());
-app.use(cookieParser("youneedabettersecret"));
+app.use(cookieParser(process.env.COOKIE_SECRET));
 
 const configSession = {
-  secret: "keyboard cat",
+  secret: process.env.SESSION_SECRET,
   resave: false,
   saveUninitialized: true,
 };
