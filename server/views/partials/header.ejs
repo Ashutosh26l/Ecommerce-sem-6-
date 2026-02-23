@@ -157,12 +157,61 @@
         background-color: #3b6bb6 !important;
       }
       .theme-toggle {
+        border: 0;
+        background: transparent;
+        padding: 0;
+      }
+      .theme-toggle-track {
+        width: 74px;
+        height: 38px;
+        border-radius: 9999px;
+        background: #e5e7eb;
         border: 1px solid #cbd5e1;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 0 10px;
+        position: relative;
+        transition: background-color 180ms ease, border-color 180ms ease;
+      }
+      .theme-toggle-thumb {
+        position: absolute;
+        top: 3px;
+        left: 3px;
+        width: 30px;
+        height: 30px;
+        border-radius: 9999px;
+        background: #3244aa;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #ffffff;
+        font-size: 16px;
+        line-height: 1;
+        box-shadow: 0 2px 6px rgba(15, 23, 42, 0.25);
+        transition: transform 180ms ease, background-color 180ms ease;
+      }
+      .theme-toggle-icons {
+        width: 100%;
+        display: flex;
+        justify-content: space-between;
+        font-size: 16px;
+        line-height: 1;
+        color: #6b7280;
       }
       html.dark .theme-toggle {
-        border-color: var(--dm-border);
-        color: var(--dm-text-strong);
-        background-color: var(--dm-surface);
+        background: transparent;
+      }
+      html.dark .theme-toggle-track {
+        background: #111827;
+        border-color: #1f2937;
+      }
+      html.dark .theme-toggle-thumb {
+        transform: translateX(36px);
+        background: #3244aa;
+      }
+      html.dark .theme-toggle-icons {
+        color: #9ca3af;
       }
     </style>
   </head>
@@ -183,15 +232,6 @@
               <button class="rounded-r-lg bg-slate-900 text-white px-4 py-2">Search</button>
             </form>
             <nav class="flex items-center gap-3 sm:gap-5 text-sm font-medium">
-              <button
-                type="button"
-                class="theme-toggle rounded-md px-2.5 py-1.5 text-slate-700 hover:text-indigo-600 transition-colors"
-                data-theme-toggle
-                aria-label="Toggle dark mode"
-                title="Toggle dark mode"
-              >
-                Dark
-              </button>
               <a href="/" class="text-slate-700 hover:text-indigo-600">Home</a>
               <% if (currentUser) { %>
               <% const isRetailer = currentUser.role === "retailer" || currentUser.role === "admin"; %>
@@ -212,9 +252,39 @@
                 <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
                 <button type="submit" class="text-slate-700 hover:text-indigo-600">Logout</button>
               </form>
+              <button
+                type="button"
+                class="theme-toggle"
+                data-theme-toggle
+                aria-label="Toggle dark mode"
+                title="Toggle dark mode"
+              >
+                <span class="theme-toggle-track" aria-hidden="true">
+                  <span class="theme-toggle-icons">
+                    <span>&#9728;</span>
+                    <span>&#9790;</span>
+                  </span>
+                  <span class="theme-toggle-thumb"></span>
+                </span>
+              </button>
               <% } else { %>
               <a href="/auth/login" class="text-slate-700 hover:text-indigo-600">Login</a>
               <a href="/auth/register" class="rounded-md bg-indigo-600 px-3 py-1.5 text-white hover:bg-indigo-700">Register</a>
+              <button
+                type="button"
+                class="theme-toggle"
+                data-theme-toggle
+                aria-label="Toggle dark mode"
+                title="Toggle dark mode"
+              >
+                <span class="theme-toggle-track" aria-hidden="true">
+                  <span class="theme-toggle-icons">
+                    <span>&#9728;</span>
+                    <span>&#9790;</span>
+                  </span>
+                  <span class="theme-toggle-thumb"></span>
+                </span>
+              </button>
               <% } %>
             </nav>
           </div>

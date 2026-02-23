@@ -175,6 +175,11 @@ export const getProductDetailPage = async (req, res) => {
     }
     const productView = product.toObject();
     productView.isAvailable = hasStock(productView);
+    productView.isWishlisted = false;
+    if (res.locals.currentUser?.role === "buyer") {
+      const user = await User.findById(req.user.id).select("wishlist");
+      productView.isWishlisted = (user?.wishlist || []).some((productId) => productId.toString() === id);
+    }
     return res.render("product_detail", { product: productView });
   } catch (error) {
     return res.status(500).render("error", { statusCode: 500, message: "Unable to load product details" });

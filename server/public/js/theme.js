@@ -7,8 +7,8 @@
     root.classList.toggle("dark", isDark);
     root.style.colorScheme = isDark ? "dark" : "light";
     if (toggle) {
-      toggle.textContent = isDark ? "Light" : "Dark";
       toggle.setAttribute("aria-pressed", String(isDark));
+      toggle.setAttribute("title", isDark ? "Switch to light mode" : "Switch to dark mode");
     }
   };
 
