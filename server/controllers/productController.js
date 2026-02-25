@@ -69,6 +69,23 @@ const getSafeRedirectPath = (value, fallback) => {
   return value;
 };
 
+const calculateShipping = (subtotal) => {
+  const amount = Math.max(0, Number(subtotal || 0));
+  if (amount >= 499) return 0;
+  // Low-value orders pay a small delivery fee near the requested 10-15% band.
+  return Math.max(49, Math.round(amount * 0.12));
+};
+
+const getCheckoutPricing = (cartItems) => {
+  const subtotal = (cartItems || []).reduce(
+    (sum, item) => sum + Number(item.product?.price || 0) * Number(item.quantity || 0),
+    0
+  );
+  const shipping = calculateShipping(subtotal);
+  const finalTotal = Math.max(0, subtotal + shipping);
+  return { subtotal, shipping, finalTotal };
+};
+
 export const getProducts = async (req, res) => {
   try {
     const products = await Product.find(getOwnerFilter(req)).sort({ createdAt: -1 });
@@ -411,6 +428,7 @@ export const getWishlistPage = async (req, res) => {
 export const getBuyNowPage = async (req, res) => {
   try {
     const { id } = req.params;
+    const shouldAddItem = req.query.add === "1";
     const product = await Product.findById(id);
 
     if (!product) {
@@ -426,22 +444,28 @@ export const getBuyNowPage = async (req, res) => {
     const user = await User.findById(req.user.id);
     if (!user) return res.status(401).redirect("/auth/login");
 
-    const existingIndex = user.cart.findIndex((item) => item.product.toString() === id);
-    if (existingIndex >= 0) {
-      user.cart[existingIndex].quantity += 1;
-    } else {
-      user.cart.push({ product: product._id, quantity: 1 });
+    // Only add once when explicitly requested from product page.
+    // Redirect to clean URL so refresh does not add again.
+    if (shouldAddItem) {
+      const existingIndex = user.cart.findIndex((item) => item.product.toString() === id);
+      if (existingIndex >= 0) {
+        user.cart[existingIndex].quantity += 1;
+      } else {
+        user.cart.push({ product: product._id, quantity: 1 });
+      }
+      await user.save();
+      return res.redirect(`/products/${id}/buy-now`);
     }
-    await user.save();
 
     const hydratedUser = await User.findById(req.user.id).populate("cart.product");
     const cartItems = (hydratedUser?.cart || []).filter((item) => item.product);
-    const total = cartItems.reduce(
-      (sum, item) => sum + Number(item.product.price || 0) * Number(item.quantity || 0),
-      0
-    );
-
-    return res.render("buy_now", { product, cartItems, total, formData: {} });
+    const pricing = getCheckoutPricing(cartItems);
+    return res.render("buy_now", {
+      product,
+      cartItems,
+      formData: {},
+      ...pricing,
+    });
   } catch (error) {
     return res.status(500).render("error", { statusCode: 500, message: "Unable to load checkout page" });
   }
@@ -455,18 +479,15 @@ export const buyNow = async (req, res) => {
     const user = await User.findById(req.user.id).populate("cart.product");
     if (!user) return res.status(401).redirect("/auth/login");
     const cartItems = (user.cart || []).filter((item) => item.product);
-    const total = cartItems.reduce(
-      (sum, item) => sum + Number(item.product.price || 0) * Number(item.quantity || 0),
-      0
-    );
+    const pricing = getCheckoutPricing(cartItems);
 
     if (cartItems.length === 0) {
       return res.status(400).render("buy_now", {
         product,
         cartItems,
-        total,
         formData: req.body,
         error: "Your cart is empty. Add products before checkout.",
+        ...pricing,
       });
     }
 
@@ -474,9 +495,9 @@ export const buyNow = async (req, res) => {
       return res.status(400).render("buy_now", {
         product,
         cartItems,
-        total,
         formData: req.body,
         error: "Please fill all required checkout details",
+        ...pricing,
       });
     }
 
@@ -486,9 +507,9 @@ export const buyNow = async (req, res) => {
         return res.status(400).render("buy_now", {
           product,
           cartItems,
-          total,
           formData: req.body,
           error: "One of the items in your cart no longer exists.",
+          ...pricing,
         });
       }
 
@@ -498,9 +519,9 @@ export const buyNow = async (req, res) => {
         return res.status(400).render("buy_now", {
           product,
           cartItems,
-          total,
           formData: req.body,
           error: `Only ${Math.max(availableQuantity, 0)} item(s) available for ${stockProduct.name}.`,
+          ...pricing,
         });
       }
     }

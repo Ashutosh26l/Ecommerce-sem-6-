@@ -104,15 +104,15 @@
         <div class="mt-4 space-y-2 text-sm">
           <div class="flex items-center justify-between text-slate-600">
             <span>Subtotal</span>
-            <span>&#8377; <%= total || 0 %></span>
+            <span>&#8377; <%= subtotal || 0 %></span>
           </div>
           <div class="flex items-center justify-between text-slate-600">
             <span>Shipping</span>
-            <span>Free</span>
+            <span><%= shipping > 0 ? ('₹ ' + shipping) : 'Free' %></span>
           </div>
           <div class="border-t border-slate-200 pt-2 flex items-center justify-between">
             <span class="font-semibold text-slate-900">Total</span>
-            <span class="text-xl font-bold text-indigo-700">&#8377; <%= total || 0 %></span>
+            <span class="text-xl font-bold text-indigo-700">&#8377; <%= finalTotal || 0 %></span>
           </div>
         </div>
       </div>

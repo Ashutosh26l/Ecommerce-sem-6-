@@ -4,7 +4,7 @@ isRetailer = currentUser && (currentUser.role === "retailer" || currentUser.role
 === "admin"); %> <% const showEdit = isRetailer && p.owner &&
 p.owner.toString() === currentUser._id.toString(); %>
 
-<section class="max-w-6xl mx-auto px-6 py-10">
+<section class="max-w-6xl mx-auto py-10">
   <%- include("partials/flash") %>
   <div class="mb-6">
     <a
@@ -182,7 +182,7 @@ p.owner.toString() === currentUser._id.toString(); %>
           </button>
         </form>
         <a
-          href="/products/<%= p._id %>/buy-now"
+          href="/products/<%= p._id %>/buy-now?add=1"
           class="flex-1 w-full text-center bg-slate-900 hover:bg-slate-800 text-white font-medium py-3 rounded-lg transition-colors"
         >
           Buy Now
