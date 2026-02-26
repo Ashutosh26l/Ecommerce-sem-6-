@@ -5,6 +5,12 @@ const signToken = (userId) =>
   jwt.sign({ userId }, process.env.JWT_SECRET, { expiresIn: "1d" });
 const wantsHtml = (req) => req.headers.accept && req.headers.accept.includes("text/html");
 const getRoleFromEmail = (email) => (/@tri\.com$/i.test(String(email || "").trim()) ? "retailer" : "buyer");
+const getTokenCookieOptions = () => ({
+  httpOnly: true,
+  secure: process.env.NODE_ENV === "production",
+  sameSite: "lax",
+  maxAge: 24 * 60 * 60 * 1000,
+});
 
 export const renderRegisterPage = (req, res) => {
   return res.render("register", { error: null, form: {} });
@@ -108,12 +114,7 @@ export const login = async (req, res) => {
 
     const token = signToken(user._id.toString());
 
-    res.cookie("token", token, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "lax",
-      maxAge: 24 * 60 * 60 * 1000,
-    });
+    res.cookie("token", token, getTokenCookieOptions());
 
     if (wantsHtml(req)) {
       return res.redirect("/");
@@ -121,7 +122,6 @@ export const login = async (req, res) => {
 
     return res.status(200).json({
       message: "Login successful",
-      token,
       user: {
         id: user._id,
         name: user.name,
@@ -138,11 +138,7 @@ export const login = async (req, res) => {
 };
 
 export const logout = (req, res) => {
-  res.clearCookie("token", {
-    httpOnly: true,
-    sameSite: "lax",
-    secure: process.env.NODE_ENV === "production",
-  });
+  res.clearCookie("token", getTokenCookieOptions());
 
   if (wantsHtml(req)) {
     return res.redirect("/auth/login");

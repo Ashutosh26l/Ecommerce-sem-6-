@@ -3,13 +3,7 @@ import User from "../models/userModel.js";
 
 const getCookieValue = (req, key) => req.cookies?.[key] || null;
 
-const extractToken = (req) => {
-  const authHeader = req.headers.authorization;
-  const bearerToken =
-    authHeader && authHeader.startsWith("Bearer ") ? authHeader.split(" ")[1] : null;
-  const cookieToken = getCookieValue(req, "token");
-  return bearerToken || cookieToken;
-};
+const extractToken = (req) => getCookieValue(req, "token");
 
 const authMiddleware = (req, res, next) => {
   try {
