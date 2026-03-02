@@ -71,15 +71,8 @@ p.owner.toString() === currentUser._id.toString(); %>
           </div>
           <div class="bg-slate-50 rounded-lg p-4">
             <p class="text-sm text-slate-500">Product ID</p>
-            <p class="text-lg font-semibold text-slate-900">
+            <p class="text-sm sm:text-base font-semibold text-slate-900 break-all leading-relaxed">
               <%= p._id || 'N/A' %>
-            </p>
-          </div>
-          <div class="bg-slate-50 rounded-lg p-4">
-            <p class="text-sm text-slate-500">Created On</p>
-            <p class="text-lg font-semibold text-slate-900">
-              <%= p.dateCreated ? new Date(p.dateCreated).toLocaleDateString() :
-              'N/A' %>
             </p>
           </div>
         </div>
@@ -110,13 +103,6 @@ p.owner.toString() === currentUser._id.toString(); %>
           novalidate
         >
           <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
-          <input
-            type="text"
-            name="userName"
-            placeholder="Your name"
-            required
-            class="w-full rounded-lg border border-slate-300 px-4 py-2 outline-none focus:border-indigo-500"
-          />
           <select
             name="rating"
             required
@@ -149,7 +135,7 @@ p.owner.toString() === currentUser._id.toString(); %>
           p.reviews.slice().reverse().forEach(function(review) { %>
           <div class="border border-slate-200 rounded-lg p-4">
             <div class="flex items-center justify-between">
-              <p class="font-semibold text-slate-900"><%= review.userName %></p>
+              <p class="font-semibold text-slate-900"><%= review.userName || 'User' %></p>
               <p class="text-sm text-amber-500">
                 <%= '★'.repeat(review.rating) %><%= '☆'.repeat(5 -
                 review.rating) %>

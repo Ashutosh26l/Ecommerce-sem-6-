@@ -240,10 +240,11 @@ export const updateProductPage = async (req, res) => {
 export const addProductReview = async (req, res) => {
   try {
     const { id } = req.params;
-    const { userName, rating, comment } = req.body;
+    const { rating, comment } = req.body;
+    const currentUserName = String(res.locals.currentUser?.name || "").trim();
     const parsedRating = Number(rating);
 
-    if (!userName || !comment || Number.isNaN(parsedRating) || parsedRating < 1 || parsedRating > 5) {
+    if (!currentUserName || !comment || Number.isNaN(parsedRating) || parsedRating < 1 || parsedRating > 5) {
       req.flash("error", "Please provide a valid review");
       return res.redirect(`/products/${id}`);
     }
@@ -253,7 +254,7 @@ export const addProductReview = async (req, res) => {
       {
         $push: {
           reviews: {
-            userName: String(userName).trim(),
+            userName: currentUserName,
             rating: parsedRating,
             comment: String(comment).trim(),
           },

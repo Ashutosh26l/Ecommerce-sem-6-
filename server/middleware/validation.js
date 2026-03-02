@@ -12,7 +12,6 @@ export const productSchema = Joi.object({
 });
 
 export const reviewSchema = Joi.object({
-  userName: Joi.string().trim().min(2).required(),
   rating: Joi.number().min(1).max(5).required(),
   comment: Joi.string().trim().min(2).required(),
   _csrf: Joi.string().optional(),
