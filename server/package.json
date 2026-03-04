@@ -21,10 +21,14 @@
     "express-rate-limit": "^7.5.0",
     "express-session": "^1.19.0",
     "helmet": "^8.1.0",
+    "howler": "^2.2.4",
     "joi": "^17.13.3",
     "jsonwebtoken": "^9.0.2",
     "mongoose": "^9.1.2",
-    "path": "^0.12.7"
+    "path": "^0.12.7",
+    "pinia": "^2.3.1",
+    "three": "^0.160.0",
+    "vue": "^3.5.29"
   },
   "devDependencies": {
     "tailwindcss": "^4.1.18"
