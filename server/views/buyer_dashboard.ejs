@@ -8,8 +8,8 @@
     <h1 class="mt-4 text-4xl sm:text-5xl font-bold">Shop smarter, faster, and safer</h1>
     <p class="mt-4 text-slate-200 text-lg">Find products, compare prices, and place your order in a few clicks.</p>
     <div class="mt-8 flex flex-wrap gap-3">
-      <a href="/products/allProducts" class="bg-amber-400 hover:bg-amber-300 text-slate-900 font-semibold px-6 py-3 rounded-lg transition-colors">Start Shopping</a>
-      <a href="/products/cart" class="bg-white/10 hover:bg-white/20 border border-white/20 text-white font-semibold px-6 py-3 rounded-lg transition-colors">Open Cart</a>
+      <a href="/products/allProducts" data-animate-cta class="bg-amber-400 hover:bg-amber-300 text-slate-900 font-semibold px-6 py-3 rounded-lg transition-colors">Start Shopping</a>
+      <a href="/products/cart" data-animate-cta class="bg-white/10 hover:bg-white/20 border border-white/20 text-white font-semibold px-6 py-3 rounded-lg transition-colors">Open Cart</a>
     </div>
   </div>
 </section>
@@ -22,7 +22,7 @@
   <div class="mt-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
     <% if (featuredProducts && featuredProducts.length) { %>
     <% featuredProducts.forEach(function(item) { %>
-    <a href="/products/<%= item._id %>" class="group bg-white border border-slate-200 rounded-xl overflow-hidden hover:shadow-md transition-shadow">
+    <a href="/products/<%= item._id %>" data-animate-card class="group bg-white border border-slate-200 rounded-xl overflow-hidden hover:shadow-md transition-shadow">
       <div class="h-44 bg-gradient-to-br from-indigo-500 to-slate-700 overflow-hidden">
         <img src="<%= item.image || '/mobile.jpg' %>" alt="<%= item.name %>" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
       </div>

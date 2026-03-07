@@ -13,19 +13,21 @@ import {
   getEditProductPage,
   getProductDetailPage,
   removeCartItem,
+  replyToReview,
   toggleWishlist,
   updateCartItemQuantity,
   updateProductPage,
 } from "../controllers/productController.js";
 import { requireAuthPage, requireBuyerPage, requireRetailerPage } from "../middleware/auth.js";
-import { validateProduct, validateReview } from "../middleware/validation.js";
+import { validateProduct, validateReview, validateReviewReply } from "../middleware/validation.js";
 
 const router = express.Router();
 
 router.use(requireAuthPage);
 
 router.get("/allProducts", getAllProductsPage);
-router.post("/:id/reviews", validateReview, addProductReview);
+router.post("/:id/reviews", requireBuyerPage, validateReview, addProductReview);
+router.post("/:id/reviews/:reviewIndex/reply", requireRetailerPage, validateReviewReply, replyToReview);
 router.get("/new", requireRetailerPage, getAddProductPage);
 router.post("/new", requireRetailerPage, validateProduct, createProductPage);
 router.get("/edit/:id", requireRetailerPage, getEditProductPage);

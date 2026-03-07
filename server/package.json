@@ -20,6 +20,7 @@
     "express": "^5.2.1",
     "express-rate-limit": "^7.5.0",
     "express-session": "^1.19.0",
+    "gsap": "^3.12.5",
     "helmet": "^8.1.0",
     "howler": "^2.2.4",
     "joi": "^17.13.3",

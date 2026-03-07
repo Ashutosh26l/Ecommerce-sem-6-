@@ -1,6 +1,8 @@
 (() => {
   const body = document.body;
   if (!body) return;
+  const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const canAnimate = () => Boolean(window.gsap) && !prefersReducedMotion;
 
   const state = {
     toastRoot: null,
@@ -24,17 +26,39 @@
         ? "border-rose-200 bg-rose-50 text-rose-800"
         : "border-emerald-200 bg-emerald-50 text-emerald-800";
     const toast = document.createElement("div");
-    toast.className =
-      `rounded-xl border px-4 py-3 text-sm font-medium shadow-lg transition-all duration-300 ${tone} translate-y-2 opacity-0`;
+    toast.className = `rounded-xl border px-4 py-3 text-sm font-medium shadow-lg ${tone}`;
     toast.textContent = message;
+    toast.style.opacity = "0";
+    toast.style.transform = "translateY(8px)";
     root.appendChild(toast);
+    if (canAnimate()) {
+      window.gsap.to(toast, {
+        opacity: 1,
+        y: 0,
+        duration: 0.25,
+        ease: "power2.out",
+      });
+      window.setTimeout(() => {
+        window.gsap.to(toast, {
+          opacity: 0,
+          y: 8,
+          duration: 0.2,
+          ease: "power1.in",
+          onComplete: () => toast.remove(),
+        });
+      }, timeout);
+      return;
+    }
 
     requestAnimationFrame(() => {
-      toast.classList.remove("translate-y-2", "opacity-0");
+      toast.style.opacity = "1";
+      toast.style.transform = "translateY(0)";
+      toast.style.transition = "opacity 260ms ease, transform 260ms ease";
     });
 
     window.setTimeout(() => {
-      toast.classList.add("translate-y-2", "opacity-0");
+      toast.style.opacity = "0";
+      toast.style.transform = "translateY(8px)";
       window.setTimeout(() => toast.remove(), 260);
     }, timeout);
   };
@@ -44,7 +68,7 @@
     const overlay = document.createElement("div");
     overlay.className = "fixed inset-0 z-[130] hidden items-center justify-center bg-slate-900/50 p-4";
     overlay.innerHTML = `
-      <div class="w-full max-w-md rounded-2xl border border-slate-200 bg-white p-5 shadow-2xl">
+      <div class="js-popup-panel w-full max-w-md rounded-2xl border border-slate-200 bg-white p-5 shadow-2xl">
         <h3 class="js-popup-title text-lg font-bold text-slate-900">Please confirm</h3>
         <p class="js-popup-message mt-2 text-sm text-slate-600"></p>
         <div class="mt-5 flex justify-end gap-2">
@@ -65,7 +89,8 @@
       const messageEl = root.querySelector(".js-popup-message");
       const confirmBtn = root.querySelector(".js-popup-confirm");
       const cancelBtn = root.querySelector(".js-popup-cancel");
-      if (!titleEl || !messageEl || !confirmBtn || !cancelBtn) return resolve(false);
+      const panel = root.querySelector(".js-popup-panel");
+      if (!titleEl || !messageEl || !confirmBtn || !cancelBtn || !panel) return resolve(false);
 
       titleEl.textContent = title || "Please confirm";
       messageEl.textContent = message || "";
@@ -73,14 +98,43 @@
       cancelBtn.textContent = cancelText;
       root.classList.remove("hidden");
       root.classList.add("flex");
+      root.style.opacity = "0";
+      panel.style.opacity = "0";
+      panel.style.transform = "translateY(10px) scale(0.98)";
 
-      const close = (decision) => {
-        root.classList.remove("flex");
-        root.classList.add("hidden");
+      if (canAnimate()) {
+        window.gsap.to(root, { opacity: 1, duration: 0.18, ease: "power1.out" });
+        window.gsap.to(panel, { opacity: 1, y: 0, scale: 1, duration: 0.22, ease: "power2.out" });
+      } else {
+        root.style.opacity = "1";
+        panel.style.opacity = "1";
+        panel.style.transform = "translateY(0) scale(1)";
+      }
+
+      let closed = false;
+      const cleanup = () => {
         confirmBtn.removeEventListener("click", onConfirm);
         cancelBtn.removeEventListener("click", onCancel);
         root.removeEventListener("click", onBackdrop);
-        resolve(decision);
+      };
+
+      const close = (decision) => {
+        if (closed) return;
+        closed = true;
+        cleanup();
+        const finish = () => {
+          root.classList.remove("flex");
+          root.classList.add("hidden");
+          resolve(decision);
+        };
+
+        if (canAnimate()) {
+          window.gsap.to(panel, { opacity: 0, y: 10, scale: 0.98, duration: 0.16, ease: "power1.in" });
+          window.gsap.to(root, { opacity: 0, duration: 0.14, ease: "power1.in", onComplete: finish });
+          return;
+        }
+
+        finish();
       };
 
       const onConfirm = () => close(true);

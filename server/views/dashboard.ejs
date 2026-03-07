@@ -21,19 +21,26 @@
       <div class="grid grid-cols-2 gap-4">
         <div class="bg-white/10 border border-white/20 rounded-2xl p-5 backdrop-blur">
           <p class="text-indigo-100 text-sm">Total Products</p>
-          <p class="text-3xl font-bold mt-1"><%= stats.totalProducts %></p>
+          <p class="text-3xl font-bold mt-1" data-animate-counter data-counter-value="<%= stats.totalProducts %>"><%= stats.totalProducts %></p>
         </div>
         <div class="bg-white/10 border border-white/20 rounded-2xl p-5 backdrop-blur">
           <p class="text-indigo-100 text-sm">In Stock</p>
-          <p class="text-3xl font-bold mt-1"><%= stats.inStockProducts %></p>
+          <p class="text-3xl font-bold mt-1" data-animate-counter data-counter-value="<%= stats.inStockProducts %>"><%= stats.inStockProducts %></p>
         </div>
         <div class="bg-white/10 border border-white/20 rounded-2xl p-5 backdrop-blur">
           <p class="text-indigo-100 text-sm">Out of Stock</p>
-          <p class="text-3xl font-bold mt-1"><%= stats.outOfStockProducts %></p>
+          <p class="text-3xl font-bold mt-1" data-animate-counter data-counter-value="<%= stats.outOfStockProducts %>"><%= stats.outOfStockProducts %></p>
         </div>
         <div class="bg-white/10 border border-white/20 rounded-2xl p-5 backdrop-blur">
           <p class="text-indigo-100 text-sm">Average Price</p>
-          <p class="text-3xl font-bold mt-1">&#8377; <%= stats.averagePrice %></p>
+          <p
+            class="text-3xl font-bold mt-1"
+            data-animate-counter
+            data-counter-value="<%= stats.averagePrice %>"
+            data-counter-prefix="₹ "
+          >
+            &#8377; <%= stats.averagePrice %>
+          </p>
         </div>
       </div>
     </div>
@@ -55,6 +62,7 @@
         <a
           href="/products/<%= item._id %>"
           class="group border border-slate-200 rounded-xl overflow-hidden hover:shadow-md transition-shadow"
+          data-animate-card
           <% if (typeof item.quantity === "number" && item.quantity > 0 && item.quantity <= 7) { %>
           data-smart-suggestion="Your top seller is low on stock (<%= item.quantity %> left)."
           <% } %>
@@ -83,15 +91,16 @@
     <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6">
       <h2 class="text-xl font-bold text-slate-900">Quick Actions</h2>
       <div class="mt-5 space-y-3">
-        <a href="/products/new" class="block w-full text-center bg-emerald-600 hover:bg-emerald-700 text-white font-medium py-3 rounded-lg transition-colors">Add Product</a>
-        <a href="/products/allProducts" class="block w-full text-center bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-3 rounded-lg transition-colors">Go to Products</a>
-        <a href="/products/allProducts?availability=true" class="block w-full text-center border border-slate-300 hover:border-slate-500 text-slate-700 font-medium py-3 rounded-lg transition-colors">Check In Stock</a>
+        <a href="/products/new" data-animate-cta class="block w-full text-center bg-emerald-600 hover:bg-emerald-700 text-white font-medium py-3 rounded-lg transition-colors">Add Product</a>
+        <a href="/products/allProducts" data-animate-cta class="block w-full text-center bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-3 rounded-lg transition-colors">Go to Products</a>
+        <a href="/products/allProducts?availability=true" data-animate-cta class="block w-full text-center border border-slate-300 hover:border-slate-500 text-slate-700 font-medium py-3 rounded-lg transition-colors">Check In Stock</a>
         <% if (currentUser && currentUser.role === "admin") { %>
-        <a href="/returns" class="block w-full text-center border border-emerald-300 hover:border-emerald-500 text-emerald-700 font-medium py-3 rounded-lg transition-colors">Approve Refunds</a>
+        <a href="/returns" data-animate-cta class="block w-full text-center border border-emerald-300 hover:border-emerald-500 text-emerald-700 font-medium py-3 rounded-lg transition-colors">Approve Refunds</a>
         <% } else { %>
         <button
           type="button"
           class="block w-full text-center border border-amber-300 hover:border-amber-500 text-amber-700 font-medium py-3 rounded-lg transition-colors"
+          data-animate-cta
           data-admin-only="true"
           data-permission-message="Only admin can approve refunds."
         >

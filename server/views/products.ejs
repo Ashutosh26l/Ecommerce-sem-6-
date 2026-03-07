@@ -27,7 +27,7 @@
       <% if (allProducts && allProducts.length > 0) { %>
       <% allProducts.forEach(function(item) { %>
       <% var imageSrc = '/mobile.jpg'; if (item.image) { imageSrc = item.image; } else if (item.name && item.name.toLowerCase().includes('bicycle')) { imageSrc = '/bicycle.jpg'; } else if (item.name && item.name.toLowerCase().includes('mobile')) { imageSrc = '/mobile.jpg'; } %>
-      <div class="relative bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition-all">
+      <div class="relative bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition-all" data-animate-card>
         <% if (isBuyer) { %>
         <form action="/products/<%= item._id %>/wishlist" method="POST" class="absolute top-3 left-3 z-10">
           <input type="hidden" name="_csrf" value="<%= csrfToken %>" />

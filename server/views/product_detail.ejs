@@ -96,6 +96,7 @@ p.owner.toString() === currentUser._id.toString(); %>
 
       <div class="bg-white rounded-2xl shadow p-6">
         <h2 class="text-lg font-semibold text-slate-900">Customer Reviews</h2>
+        <% if (currentUser && currentUser.role === "buyer") { %>
         <form
           class="mt-4 grid grid-cols-1 gap-3 needs-validation"
           method="POST"
@@ -129,10 +130,16 @@ p.owner.toString() === currentUser._id.toString(); %>
             Submit Review
           </button>
         </form>
+        <% } else if (showEdit) { %>
+        <p class="mt-4 text-sm rounded-lg border border-indigo-200 bg-indigo-50 px-4 py-3 text-indigo-800">
+          Retailer can reply to customer reviews below. New reviews can only be added by buyers.
+        </p>
+        <% } %>
 
         <div class="mt-6 space-y-3">
           <% if (p.reviews && p.reviews.length > 0) { %> <%
-          p.reviews.slice().reverse().forEach(function(review) { %>
+          p.reviews.slice().reverse().forEach(function(review, reverseIndex) { %>
+          <% const reviewIndex = p.reviews.length - 1 - reverseIndex; %>
           <div class="border border-slate-200 rounded-lg p-4">
             <div class="flex items-center justify-between">
               <p class="font-semibold text-slate-900"><%= review.userName || 'User' %></p>
@@ -146,6 +153,36 @@ p.owner.toString() === currentUser._id.toString(); %>
               <%= review.createdAt ? new Date(review.createdAt).toLocaleString()
               : '' %>
             </p>
+            <% if (review.retailerReply) { %>
+            <div class="retailer-reply-box mt-3 rounded-lg border border-emerald-300 bg-emerald-100/90 px-3 py-2">
+              <p class="retailer-reply-label text-xs font-semibold uppercase tracking-wide text-emerald-900">
+                Retailer Reply<% if (review.repliedBy) { %> by <%= review.repliedBy %><% } %>
+              </p>
+              <p class="retailer-reply-text text-sm text-emerald-950 mt-1"><%= review.retailerReply %></p>
+              <% if (review.repliedAt) { %>
+              <p class="retailer-reply-time text-xs text-emerald-800 mt-1"><%= new Date(review.repliedAt).toLocaleString() %></p>
+              <% } %>
+            </div>
+            <% } %>
+            <% if (showEdit) { %>
+            <form class="mt-3 space-y-2" method="POST" action="/products/<%= p._id %>/reviews/<%= reviewIndex %>/reply">
+              <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
+              <label class="text-sm font-medium text-slate-700">Reply to this review</label>
+              <textarea
+                name="reply"
+                rows="2"
+                required
+                class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none focus:border-indigo-500"
+                placeholder="Write retailer reply"
+              ><%= review.retailerReply || '' %></textarea>
+              <button
+                type="submit"
+                class="rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-medium px-4 py-2"
+              >
+                <%= review.retailerReply ? 'Update Reply' : 'Post Reply' %>
+              </button>
+            </form>
+            <% } %>
           </div>
           <% }); %> <% } else { %>
           <p class="text-slate-500">
@@ -161,6 +198,7 @@ p.owner.toString() === currentUser._id.toString(); %>
           <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
           <button
             type="submit"
+            data-animate-cta
             class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-3 rounded-lg transition-colors"
             <%= !p.isAvailable ? 'disabled' : '' %>
           >
@@ -169,6 +207,7 @@ p.owner.toString() === currentUser._id.toString(); %>
         </form>
         <a
           href="/products/<%= p._id %>/buy-now?add=1"
+          data-animate-cta
           class="flex-1 w-full text-center bg-slate-900 hover:bg-slate-800 text-white font-medium py-3 rounded-lg transition-colors"
         >
           Buy Now
