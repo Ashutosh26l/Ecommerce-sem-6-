@@ -27,8 +27,8 @@ const allowedOrigins = (process.env.CORS_ORIGIN || `http://localhost:${PORT}`)
 
 // Protect auth endpoints from brute-force requests.
 const authRateLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000,
-  max: 20,
+  windowMs: 1 * 60 * 1000,
+  max: 10000,
   standardHeaders: true,
   legacyHeaders: false,
   message: { message: "Too many auth attempts. Please try again later." },
@@ -132,7 +132,7 @@ app.get("/greet-session", (req, res) => {
 
 // Route groups: auth routes are CSRF-protected (and API auth is rate-limited).
 app.use("/api/auth", authRateLimiter, authRoutes);
-app.use("/auth", verifyCsrfToken, authRoutes);
+app.use("/auth", authRateLimiter, verifyCsrfToken, authRoutes);
 app.use("/api/products", productApiRoutes);
 app.use("/products", verifyCsrfToken, productRoutes);
 
