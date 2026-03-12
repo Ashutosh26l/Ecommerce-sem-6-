@@ -188,6 +188,10 @@ app.get("/api/health", (req, res) => {
   return res.status(200).json({ message: "Inventory API is running" });
 });
 
+app.get("/health", (req, res) => {
+  return res.status(200).json({ ok: true, uptime: process.uptime() });
+});
+
 app.get("/help-center", (req, res) => {
   return res.render("help_center");
 });
