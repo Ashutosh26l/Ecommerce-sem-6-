@@ -1,200 +1,156 @@
 # Ecommerce (Sem-6)
 
-A role-based ecommerce web application built with **Node.js, Express, MongoDB, and EJS**.
+Updated role-based ecommerce platform built with **Node.js + Express 5 + MongoDB + EJS**.
 
-This project supports two primary user roles:
-- **Buyer**: browse products, add reviews, manage cart and wishlist, and place orders.
-- **Retailer**: create, edit, and manage their own product inventory.
+## What This Project Does
+This is a server-rendered ecommerce app with two active roles:
 
-## Table of Contents
-1. [Project Overview](#project-overview)
-2. [Core Features](#core-features)
-3. [Tech Stack](#tech-stack)
-4. [Tools and Libraries](#tools-and-libraries)
-5. [Project Structure](#project-structure)
-6. [Architecture and Flow](#architecture-and-flow)
-7. [Routes and Endpoints](#routes-and-endpoints)
-8. [Environment Variables](#environment-variables)
-9. [Local Setup and Run](#local-setup-and-run)
-10. [Security Implementations](#security-implementations)
-11. [Current Limitations](#current-limitations)
-12. [Future Improvements](#future-improvements)
-13. [License](#license)
+- **Buyer**: browse products, filter/search catalog, manage cart and wishlist, place order, post reviews.
+- **Retailer**: manage own products, monitor buyer review notifications, reply to reviews.
 
-## Project Overview
-This is a server-rendered ecommerce application where:
-- authentication is handled with JWT stored in cookies,
-- product data is stored in MongoDB,
-- role-based access controls what users can do,
-- buyers can complete a basic checkout flow,
-- retailers can manage their own product catalog.
+The codebase supports both:
+- HTML page routes (`/auth/*`, `/products/*`, etc.)
+- JSON API routes (`/api/auth/*`, `/api/products/*`, `/api/health`)
 
-The backend also exposes JSON APIs for auth and product operations.
+## Updated Tech Stack
 
-## Core Features
-- User registration and login
-- Automatic role assignment (`@tri.com` users become `retailer`, others become `buyer`)
-- JWT-based authentication using cookies
-- Role-based access control for buyer and retailer pages
-- CSRF token protection for form/API write requests on protected route groups
-- Product CRUD (retailer-owned resources)
-- Product availability and quantity-based stock handling
-- Product listing with search/filter support
-- Product detail pages with review posting
-- Buyer cart management
-- Wishlist add/remove toggling
-- Buy-now / checkout flow with shipping calculation and stock validation
-- Flash messages for user feedback
-- Dark mode toggle support on frontend
-
-## Tech Stack
-| Layer | Technology |
+| Layer | Stack |
 |---|---|
 | Runtime | Node.js |
-| Backend Framework | Express 5 |
+| Backend | Express `5.x` (ES Modules) |
 | Database | MongoDB |
-| ODM | Mongoose |
-| Templating Engine | EJS |
-| Auth Token | JSON Web Token (JWT) |
-| Password Hashing | bcryptjs |
+| ODM | Mongoose `9.x` |
+| Views | EJS |
+| Auth | JWT (stored in `httpOnly` cookie) |
 | Validation | Joi |
-| Styling | Tailwind CSS (configured), custom CSS classes in views |
-| Session / Flash | express-session, connect-flash |
+| Password Hashing | bcryptjs |
+| Sessions / Flash | express-session + connect-flash |
+| Security | Helmet, custom CSRF middleware, express-rate-limit, cookie-parser, CORS |
+| Styling | Tailwind CSS `4.x` config + custom CSS/JS |
+| Frontend libs (installed) | GSAP, Howler, Three.js, Vue 3, Pinia |
 
-## Tools and Libraries
-| Category | Package / Tool | Purpose |
-|---|---|---|
-| Security | `helmet` | Secure HTTP headers |
-| Security | `express-rate-limit` | Auth endpoint rate limiting |
-| Security | custom CSRF middleware | CSRF protection for unsafe methods |
-| Cookies | `cookie-parser` | Parse and sign cookies |
-| CORS | `cors` | Origin-based request control |
-| Config | `dotenv` | Environment variable loading |
-| API/Auth | `jsonwebtoken` | Generate and verify JWT |
-| Validation | `joi` | Request schema validation |
-| Database | `mongoose` | Models and DB interaction |
-| UI | `ejs` | Server-side rendering |
-| Dev Styling | `tailwindcss` | Utility-first CSS framework |
+## Key Features (Current)
+
+- Role auto-assignment by email domain (`@tri.com` => `retailer`, else `buyer`)
+- Login/register for both HTML and API flows
+- JWT-based auth guard for pages + APIs
+- Product CRUD for retailer-owned resources
+- Product catalog with search, category/brand filters, price/availability filters, pagination, sorting
+- Product details with gallery/variant support
+- Buyer cart and wishlist flows
+- Buy-now checkout with stock validation and quantity deduction
+- Buyer review posting
+- Retailer review reply flow
+- Retailer notification center (pending + history)
+- Flash messages for UX feedback
+- Theme toggle + frontend behavior scripts
+- Health endpoints for app/API checks
 
 ## Project Structure
+
 ```text
 Ecommerce(sem-6)/
 |-- server/
+|   |-- app.js
+|   |-- index.js
+|   |-- package.json
 |   |-- config/
-|   |   `-- db.js
+|   |   |-- db.js
+|   |   |-- cors.js
+|   |   `-- session.js
 |   |-- controllers/
 |   |   |-- authController.js
-|   |   `-- productController.js
+|   |   |-- siteController.js
+|   |   |-- productController.js
+|   |   `-- products/
 |   |-- middleware/
 |   |   |-- auth.js
 |   |   |-- csrf.js
-|   |   `-- validation.js
+|   |   |-- rateLimit.js
+|   |   |-- flashMessages.js
+|   |   `-- validation/
 |   |-- models/
+|   |   |-- userModel.js
 |   |   |-- productModel.js
-|   |   `-- userModel.js
-|   |-- public/
-|   |   |-- js/
-|   |   |   |-- bootstrap-validation.js
-|   |   |   |-- search.js
-|   |   |   `-- theme.js
-|   |   `-- *.jpg
+|   |   `-- notificationHistoryModel.js
 |   |-- routes/
 |   |   |-- authRoutes.js
+|   |   |-- productRoutes.js
 |   |   |-- productApiRoutes.js
-|   |   `-- productRoutes.js
+|   |   |-- siteRoutes.js
+|   |   `-- debugRoutes.js
+|   |-- scripts/
+|   |   `-- backfillNotificationHistory.js
+|   |-- public/
 |   |-- views/
-|   |   |-- partials/
-|   |   `-- *.ejs
-|   |-- index.js
-|   |-- package.json
 |   `-- tailwind.config.js
-|-- client/                 # currently empty
-`-- .gitignore
+`-- README.md
 ```
 
-## Architecture and Flow
-1. Client sends request to Express routes.
-2. Middleware chain applies:
-   - cookie parsing,
-   - session/flash,
-   - CORS,
-   - security headers,
-   - auth context attachment,
-   - CSRF token generation/verification.
-3. Controllers handle business logic.
-4. Mongoose models read/write MongoDB.
-5. Response is returned as:
-   - EJS page for browser routes, or
-   - JSON for API routes.
+## Routes Snapshot
 
-## Routes and Endpoints
-### Health Check
-- `GET /api/health` - API status message
+### Site
+- `GET /`
+- `GET /health`
+- `GET /api/health`
+- `GET /help-center`
+- `GET /returns`
+- `GET /shipping`
 
-### Authentication Routes
-Both `/auth/*` (HTML flow) and `/api/auth/*` (JSON flow) are implemented.
+### Auth (`/auth` and `/api/auth`)
+- `GET /register`
+- `GET /login`
+- `POST /register`
+- `POST /login`
+- `POST /logout`
 
-- `GET /auth/register`
-- `GET /auth/login`
-- `POST /auth/register`
-- `POST /auth/login`
-- `POST /auth/logout`
+### Product Pages (`/products`)
+- `GET /allProducts`
+- `GET/POST /new` (retailer)
+- `GET/POST /edit/:id` (retailer)
+- `POST /:id/delete` (retailer)
+- `GET /notifications` (retailer)
+- `POST /notifications/:notificationId/read` (retailer)
+- `GET /cart` (buyer)
+- `GET /wishlist` (buyer)
+- `POST /:id/cart` (buyer)
+- `POST /:id/cart/update` (buyer)
+- `POST /:id/cart/remove` (buyer)
+- `POST /:id/wishlist` (buyer)
+- `POST /:id/reviews` (buyer)
+- `POST /:id/reviews/:reviewIndex/reply` (retailer)
+- `POST /:id/buy-now/start` (buyer)
+- `GET /:id/buy-now` (buyer)
+- `POST /:id/buy-now` (buyer)
+- `GET /:id`
 
-Equivalent API base:
-- `/api/auth/register`
-- `/api/auth/login`
-- `/api/auth/logout`
-
-### Product API Routes (`/api/products`)
-- `GET /api/products` - list authenticated retailer products
-- `POST /api/products` - create product
-- `PUT /api/products/:id` - full update
-- `PATCH /api/products/:id` - partial update
-- `DELETE /api/products/:id` - delete product
-
-### Product Page Routes (`/products`)
-- `GET /products/allProducts`
-- `GET /products/new` (retailer only)
-- `POST /products/new` (retailer only)
-- `GET /products/edit/:id` (retailer only)
-- `POST /products/edit/:id` (retailer only)
-- `GET /products/cart` (buyer only)
-- `GET /products/wishlist` (buyer only)
-- `POST /products/:id/cart` (buyer only)
-- `POST /products/:id/cart/update` (buyer only)
-- `POST /products/:id/cart/remove` (buyer only)
-- `POST /products/:id/wishlist` (buyer only)
-- `GET /products/:id/buy-now` (buyer only)
-- `POST /products/:id/buy-now` (buyer only)
-- `POST /products/:id/reviews`
-- `GET /products/:id`
+### Product API (`/api/products`) - retailer scoped
+- `GET /`
+- `POST /`
+- `PUT /:id`
+- `PATCH /:id`
+- `DELETE /:id`
 
 ## Environment Variables
-Create a `.env` file inside the `server/` directory.
+Create `server/.env`:
 
 ```env
 PORT=5500
 MONGO_URI=mongodb://localhost:27017/ecoEcom-backend
-JWT_SECRET=your_jwt_secret_here
-SESSION_SECRET=your_session_secret_here
-COOKIE_SECRET=your_cookie_secret_here
+JWT_SECRET=replace_with_strong_secret
+SESSION_SECRET=replace_with_strong_secret
+COOKIE_SECRET=replace_with_strong_secret
 CORS_ORIGIN=http://localhost:5500
 NODE_ENV=development
 ```
 
 Notes:
-- `PORT` defaults to `5500` if not provided.
 - `CORS_ORIGIN` supports comma-separated values.
-- `SESSION_SECRET`, `JWT_SECRET`, and `COOKIE_SECRET` must be strong values in production.
+- Keep all secrets strong in production.
 
-## Local Setup and Run
-### Prerequisites
-- Node.js (LTS recommended)
-- npm
-- MongoDB (local or cloud)
+## Setup and Run
 
-### Steps
-1. Move to server directory:
+1. Go to server directory:
    ```bash
    cd server
    ```
@@ -202,35 +158,36 @@ Notes:
    ```bash
    npm install
    ```
-3. Configure environment variables in `server/.env`.
-4. Start the app:
+3. Add `server/.env` values.
+4. Start server:
    ```bash
    node index.js
    ```
-5. Open in browser:
+5. Open:
    - `http://localhost:5500`
 
+## Available Scripts (`server/package.json`)
+
+- `npm test`
+  - placeholder script (currently exits with error)
+- `npm run backfill:notifications`
+  - backfills `notificationHistory` from existing product reviews
+
 ## Security Implementations
-- Helmet is enabled for secure default headers.
-- Rate limiting is applied on auth API routes.
-- JWT token is stored as `httpOnly` cookie.
-- CSRF token middleware is used for state-changing operations.
-- Joi validation enforces product/review payload shape.
-- Role-based middleware restricts buyer/retailer access.
 
-## Current Limitations
-- No automated test suite configured yet.
-- `npm test` is currently a placeholder script.
-- Tailwind build pipeline scripts are not yet defined in `package.json`.
-- `client/` directory is present but currently unused.
+- Helmet security headers
+- Rate limiter on auth route groups
+- JWT in `httpOnly` cookie
+- CSRF token cookie + token verification for unsafe methods
+- Joi validations for product/review/reply payloads
+- Role-based route protection (buyer/retailer)
 
-## Future Improvements
-- Add `start`, `dev`, and `test` scripts.
-- Add automated tests (unit + integration).
-- Add order history and payment gateway integration.
-- Add image upload/storage support (Cloudinary/S3).
-- Add admin analytics dashboard.
-- Add CI/CD pipeline and environment-based deployment docs.
+## Current Gaps / Notes
+
+- No automated test suite yet
+- No `start` / `dev` script yet (currently run with `node index.js`)
+- `client/` folder exists but has no active app code right now
+- `seed.js` is currently a placeholder
 
 ## License
-Currently set as `ISC` (as per `server/package.json`).
+ISC (as defined in `server/package.json`)
